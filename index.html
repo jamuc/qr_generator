@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+  <meta name="description" content="Generate QR codes instantly. No tracking, no signup, no cost. Downloads as PNG and PDF." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            bg:      '#0A0A0A',
+            surface: '#111111',
+            border:  '#1F1F1F',
+            muted:   '#666666',
+            accent:  '#22C55E',
+            'accent-hover': '#16A34A',
+          },
+          keyframes: {
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '20%':       { transform: 'translateX(-6px)' },
+              '40%':       { transform: 'translateX(6px)' },
+              '60%':       { transform: 'translateX(-4px)' },
+              '80%':       { transform: 'translateX(4px)' },
+            },
+            fadeIn: {
+              '0%':   { opacity: '0', transform: 'translateY(8px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+          animation: {
+            shake:   'shake 0.35s ease-in-out',
+            fadeIn:  'fadeIn 0.2s ease-out forwards',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body { background-color: #0A0A0A; }
+
+    /* Focus ring override for accent colour */
+    #url-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #22C55E40;
+      border-color: #22C55E;
+    }
+
+    /* QR preview image — crisp rendering */
+    #qr-preview {
+      image-rendering: pixelated;
+    }
+
+    .btn-accent {
+      background-color: #22C55E;
+      transition: background-color 0.15s ease;
+    }
+    .btn-accent:hover  { background-color: #16A34A; }
+    .btn-accent:active { background-color: #15803D; }
+
+    .shake { animation: shake 0.35s ease-in-out; }
+    .fade-in { animation: fadeIn 0.2s ease-out forwards; }
+  </style>
+
+  <!-- QR Code library (QRious — reliable browser global) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-bg font-sans text-[#F5F5F5] flex flex-col">
+
+  <!-- Page wrapper -->
+  <main class="flex-1 flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-lg">
+
+      <!-- Trust badges -->
+      <div class="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-10">
+        <span class="flex items-center gap-1.5 text-xs text-muted tracking-wide">
+          <span class="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span>
+          No tracking
+        </span>
+        <span class="flex items-center gap-1.5 text-xs text-muted tracking-wide">
+          <span class="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span>
+          No signup
+        </span>
+        <span class="flex items-center gap-1.5 text-xs text-muted tracking-wide">
+          <span class="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span>
+          Free forever
+        </span>
+      </div>
+
+      <!-- Card -->
+      <div class="bg-surface border border-border rounded-2xl p-8 sm:p-10">
+
+        <!-- Heading -->
+        <div class="mb-8">
+          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
+            QR Code Generator
+          </h1>
+          <p class="text-muted text-sm leading-relaxed">
+            Enter a URL. Get a QR code.<br />
+            Downloads instantly as <span class="text-[#F5F5F5]">PNG</span> and <span class="text-[#F5F5F5]">PDF</span>. Nothing stored, nothing sent.
+          </p>
+        </div>
+
+        <!-- Form -->
+        <form id="qr-form" novalidate>
+          <div class="mb-3" id="input-wrapper">
+            <input
+              id="url-input"
+              type="url"
+              inputmode="url"
+              autocomplete="url"
+              spellcheck="false"
+              placeholder="https://example.com"
+              class="w-full h-12 px-4 rounded-lg bg-bg border border-border text-[#F5F5F5] text-sm placeholder:text-muted transition-colors duration-150"
+            />
+            <p id="error-msg" class="mt-2 text-xs text-red-400 hidden"></p>
+          </div>
+
+          <button
+            type="submit"
+            id="generate-btn"
+            class="btn-accent w-full h-12 rounded-lg text-sm font-medium text-white flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <path d="M14 14h2v2h-2zM18 14h3v3h-3zM14 18h3v3h-3zM19 19h2v2h-2z"/>
+            </svg>
+            Generate QR Code
+          </button>
+        </form>
+
+        <!-- Result area (hidden by default) -->
+        <div id="result-area" class="hidden mt-8">
+          <div class="flex flex-col items-center gap-4">
+            <!-- QR preview -->
+            <div class="rounded-xl overflow-hidden border border-border bg-white p-3">
+              <img id="qr-preview" src="" alt="QR Code preview" class="w-56 h-56 sm:w-64 sm:h-64 block" />
+            </div>
+
+            <!-- Status message -->
+            <p id="status-msg" class="text-xs text-muted text-center"></p>
+
+            <!-- Reset link -->
+            <button
+              id="reset-btn"
+              class="text-xs text-muted underline underline-offset-2 hover:text-[#F5F5F5] transition-colors duration-150 hidden"
+            >
+              Generate another ↑
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /card -->
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-8 text-center">
+    <span class="text-muted text-xs tracking-widest">— JF —</span>
+  </footer>
+
+  <script>
+    (function () {
+      const form        = document.getElementById('qr-form');
+      const input       = document.getElementById('url-input');
+      const errorMsg    = document.getElementById('error-msg');
+      const resultArea  = document.getElementById('result-area');
+      const qrPreview   = document.getElementById('qr-preview');
+      const statusMsg   = document.getElementById('status-msg');
+      const resetBtn    = document.getElementById('reset-btn');
+
+      function normaliseUrl(raw) {
+        const trimmed = raw.trim();
+        if (!trimmed) return null;
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        return 'https://' + trimmed;
+      }
+
+      function isValidUrl(str) {
+        try {
+          const u = new URL(str);
+          return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      }
+
+      function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.remove('hidden');
+        input.classList.add('shake', 'border-red-500');
+        input.addEventListener('animationend', () => {
+          input.classList.remove('shake');
+        }, { once: true });
+      }
+
+      function clearError() {
+        errorMsg.classList.add('hidden');
+        input.classList.remove('border-red-500');
+      }
+
+      function setStatus(msg, done = false) {
+        statusMsg.textContent = msg;
+        if (done) {
+          resetBtn.classList.remove('hidden');
+        }
+      }
+
+      function triggerDownload(dataUrl, filename) {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      function generate(url) {
+        // QRious is synchronous — generates an 800×800 QR code and returns a data URL
+        const qr = new QRious({
+          value: url,
+          size: 800,
+          padding: 16,
+          background: '#ffffff',
+          foreground: '#000000',
+        });
+        const dataUrl = qr.toDataURL('image/png');
+
+        // Show preview
+        qrPreview.src = dataUrl;
+        resultArea.classList.remove('hidden');
+        resultArea.classList.add('fade-in');
+        setStatus('Downloading PNG + PDF…');
+
+        // Download PNG
+        triggerDownload(dataUrl, 'qrcode.png');
+
+        // Download PDF after a short delay (avoid simultaneous download block in some browsers)
+        setTimeout(() => {
+          const { jsPDF } = window.jspdf;
+          // Square 210mm page — clean format for a QR code
+          const doc = new jsPDF({ unit: 'mm', format: [210, 210] });
+          doc.addImage(dataUrl, 'PNG', 0, 0, 210, 210);
+          doc.save('qrcode.pdf');
+
+          setStatus('Done — PNG & PDF downloaded.', true);
+        }, 600);
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearError();
+
+        const raw = input.value;
+        const url = normaliseUrl(raw);
+
+        if (!url) {
+          showError('Please enter a URL.');
+          return;
+        }
+        if (!isValidUrl(url)) {
+          showError('Please enter a valid URL (e.g. https://example.com).');
+          return;
+        }
+
+        try {
+          generate(url);
+        } catch (err) {
+          showError('Something went wrong generating the QR code.');
+          console.error(err);
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        input.value = '';
+        input.focus();
+        resultArea.classList.add('hidden');
+        resultArea.classList.remove('fade-in');
+        resetBtn.classList.add('hidden');
+        clearError();
+        // Scroll back to top of card smoothly
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // Clear error on input
+      input.addEventListener('input', clearError);
+    })();
+  </script>
+
+</body>
+</html>
