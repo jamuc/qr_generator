@@ -21,12 +21,12 @@
             sans: ['Inter', 'sans-serif'],
           },
           colors: {
-            bg:      '#0A0A0A',
-            surface: '#111111',
-            border:  '#1F1F1F',
-            muted:   '#9CA3AF',
-            accent:  '#22C55E',
-            'accent-hover': '#16A34A',
+            bg:      '#F7F6F3',
+            surface: '#FFFFFF',
+            border:  '#E4E3DE',
+            muted:   '#6B6B6B',
+            accent:  '#16A34A',
+            'accent-hover': '#15803D',
           },
           keyframes: {
             shake: {
@@ -51,13 +51,13 @@
   </script>
 
   <style>
-    body { background-color: #0A0A0A; }
+    body { background-color: #F7F6F3; }
 
     /* Focus ring override for accent colour */
     #url-input:focus {
       outline: none;
-      box-shadow: 0 0 0 2px #22C55E40;
-      border-color: #22C55E;
+      box-shadow: 0 0 0 3px #16A34A25;
+      border-color: #16A34A;
     }
 
     /* QR preview image — crisp rendering */
@@ -66,11 +66,11 @@
     }
 
     .btn-accent {
-      background-color: #22C55E;
+      background-color: #16A34A;
       transition: background-color 0.15s ease;
     }
-    .btn-accent:hover  { background-color: #16A34A; }
-    .btn-accent:active { background-color: #15803D; }
+    .btn-accent:hover  { background-color: #15803D; }
+    .btn-accent:active { background-color: #166534; }
 
     .shake { animation: shake 0.35s ease-in-out; }
     .fade-in { animation: fadeIn 0.2s ease-out forwards; }
@@ -82,7 +82,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
-<body class="min-h-screen bg-bg font-sans text-white flex flex-col">
+<body class="min-h-screen bg-bg font-sans text-[#1C1C1C] flex flex-col">
 
   <!-- Page wrapper -->
   <main class="flex-1 flex items-center justify-center px-4 py-16">
@@ -105,7 +105,8 @@
       </div>
 
       <!-- Card -->
-      <div class="bg-surface border border-border rounded-2xl p-8 sm:p-10">
+      <div class="bg-surface border border-border rounded-2xl p-8 sm:p-10"
+           style="box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);">
 
         <!-- Heading -->
         <div class="mb-8">
@@ -114,7 +115,7 @@
           </h1>
           <p class="text-muted text-sm leading-relaxed">
             Enter a URL. Get a QR code.<br />
-            Downloads instantly as <span class="text-white font-medium">PNG</span> and <span class="text-white font-medium">PDF</span>. Nothing stored, nothing sent.
+            Downloads instantly as <span class="text-[#1C1C1C] font-medium">PNG</span> and <span class="text-[#1C1C1C] font-medium">PDF</span>. Nothing stored, nothing sent.
           </p>
         </div>
 
@@ -128,7 +129,7 @@
               autocomplete="url"
               spellcheck="false"
               placeholder="https://example.com"
-              class="w-full h-12 px-4 rounded-lg bg-bg border border-border text-white text-sm placeholder:text-muted transition-colors duration-150"
+              class="w-full h-12 px-4 rounded-lg bg-surface border border-border text-[#1C1C1C] text-sm placeholder:text-muted transition-colors duration-150"
             />
             <p id="error-msg" class="mt-2 text-xs text-red-400 hidden"></p>
           </div>
@@ -152,7 +153,8 @@
         <div id="result-area" class="hidden mt-8">
           <div class="flex flex-col items-center gap-4">
             <!-- QR preview -->
-            <div class="rounded-xl overflow-hidden border border-border bg-white p-3">
+            <div class="rounded-xl overflow-hidden border border-border bg-surface p-3"
+                 style="box-shadow: 0 1px 4px rgba(0,0,0,0.07);">
               <img id="qr-preview" src="" alt="QR Code preview" class="w-56 h-56 sm:w-64 sm:h-64 block" />
             </div>
 
@@ -162,7 +164,7 @@
             <!-- Reset link -->
             <button
               id="reset-btn"
-              class="text-xs text-muted underline underline-offset-2 hover:text-white transition-colors duration-150 hidden"
+              class="text-xs text-muted underline underline-offset-2 hover:text-[#1C1C1C] transition-colors duration-150 hidden"
             >
               Generate another ↑
             </button>
