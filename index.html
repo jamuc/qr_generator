@@ -259,9 +259,18 @@
         // Download PDF after a short delay (avoid simultaneous download block in some browsers)
         setTimeout(() => {
           const { jsPDF } = window.jspdf;
-          // Square 210mm page — clean format for a QR code
-          const doc = new jsPDF({ unit: 'mm', format: [210, 210] });
-          doc.addImage(dataUrl, 'PNG', 0, 0, 210, 210);
+          // A4 page, QR code centered, ready for printing
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const pageW = doc.internal.pageSize.getWidth();   // 210mm
+          const pageH = doc.internal.pageSize.getHeight();  // 297mm
+          const qrSize = 150; // mm — large enough to scan when printed
+          const x = (pageW - qrSize) / 2;
+          const y = (pageH - qrSize) / 2 - 10; // slightly above centre
+          doc.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
+          // URL label below the QR code
+          doc.setFontSize(9);
+          doc.setTextColor(100);
+          doc.text(url, pageW / 2, y + qrSize + 8, { align: 'center', maxWidth: pageW - 40 });
           doc.save('qrcode.pdf');
 
           setStatus('Done — PNG & PDF downloaded.', true);
