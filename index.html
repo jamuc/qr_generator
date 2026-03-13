@@ -268,9 +268,9 @@
           const y = (pageH - qrSize) / 2 - 10; // slightly above centre
           doc.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
           // URL label below the QR code
-          doc.setFontSize(9);
-          doc.setTextColor(100);
-          doc.text(url, pageW / 2, y + qrSize + 8, { align: 'center', maxWidth: pageW - 40 });
+          doc.setFontSize(13);
+          doc.setTextColor(40);
+          doc.text(url, pageW / 2, y + qrSize + 12, { align: 'center', maxWidth: pageW - 40 });
           doc.save('qrcode.pdf');
 
           setStatus('Done — PNG & PDF downloaded.', true);
